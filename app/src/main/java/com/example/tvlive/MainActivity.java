@@ -16,7 +16,6 @@ import androidx.media3.ui.PlayerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,19 +89,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadChannels() {
-        try {
-            InputStream in = getAssets().open("channels.m3u");
-            channels = M3uParser.parse(in);
+        // 1) 先秒开本地缓存/内置源
+        List<Channel> local = SourceManager.loadLocal(this);
+        channels = (local == null) ? new ArrayList<>() : local;
+        adapter.setChannels(channels);
+        if (!channels.isEmpty()) {
+            playCurrent();
+        } else {
+            channelTitle.setText("没有可用频道");
+        }
+
+        // 2) 后台自动拉取 GitHub 最新源（更新后无需重装 APK）
+        SourceManager.refreshAsync(this, false, (remote, fromNetwork, message) -> {
+            if (remote == null || remote.isEmpty()) return;
+            String currentName = channels.isEmpty() ? null : channels.get(currentIndex).name;
+            channels = remote;
             adapter.setChannels(channels);
+
+            // 尽量保持当前正在看的频道
+            int found = -1;
+            if (currentName != null) {
+                for (int i = 0; i < channels.size(); i++) {
+                    if (channels.get(i).name.equals(currentName)) { found = i; break; }
+                }
+            }
+            currentIndex = (found >= 0) ? found : 0;
+            currentLine = 0;
             if (!channels.isEmpty()) {
                 playCurrent();
-            } else {
-                channelTitle.setText("没有可用频道");
+                if (fromNetwork) {
+                    Toast.makeText(this, message + " · " + channels.size() + " 个频道", Toast.LENGTH_SHORT).show();
+                }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "load channels failed", e);
-            Toast.makeText(this, "读取频道列表失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        });
     }
 
     private void playCurrent() {
