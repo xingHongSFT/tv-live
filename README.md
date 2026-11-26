@@ -4,7 +4,9 @@
 
 ## 特点
 
-- 直播源内置在 App 里（来自 vbskycn/iptv 开源项目，每 6 小时更新，339 个频道），不依赖外部网络地址，装好即用。
+- 直播源内置在 App 里（来自 vbskycn/iptv 开源项目，311 个频道），断网也能装好即用。
+- **自动更新源**：盒子联网时，App 每次启动都会从 GitHub 的 CDN 镜像拉取最新源；源仓库更新后 APK 无需重装即可跟上。拉取失败自动回退到内置源，不影响观看。
+- **无广告台**：解析层过滤了「支持作者」「更新时间」等推广/非频道条目，内置源和在线源都已清除。
 - 使用 ExoPlayer (Media3) 播放 HLS，支持软解/硬解。
 - 遥控器操作：上下键换台，左右键切换线路，菜单/帮助/信息键开关频道列表。
 - 最低支持 Android 7.0（minSdk 24）。
@@ -30,9 +32,11 @@ APK 输出在 `app/build/outputs/apk/release/`。
 
 ## 换源 / 更新频道
 
-编辑 `app/src/main/assets/channels.m3u`，替换成任意标准 m3u 播放列表，重新编译即可。
-内置源地址（可手动下载更新）：
-https://raw.githubusercontent.com/vbskycn/iptv/master/tv/iptv4.m3u
+- **自动更新**（默认）：无需操作。App 启动时后台拉取 GitHub 上的最新源，过滤广告后缓存到本地。源仓库每 6 小时更新，APK 不重装也能跟上。
+- **改源地址**：编辑 `SourceManager.java` 里的 `REMOTE_URLS` 数组，重新编译。
+- **改内置兜底源**：编辑 `app/src/main/assets/channels.m3u`，重新编译。
+- 在线源地址：
+  https://fastly.jsdelivr.net/gh/vbskycn/iptv@master/tv/iptv4.m3u
 
 ## 说明
 

@@ -20,6 +20,12 @@ public final class M3uParser {
             "支持作者", "赞助作者", "打赏", "微信", "公众号", "QQ群", "加群",
             "推广", "广告", "捐赠", "赞赏", "本人制作", "作者网站", "赞助"
     };
+    // 购物台关键词（电视购物、商城类频道一律过滤）
+    private static final String[] SHOPPING_WORDS = {
+            "购物", "电视购", "快乐购", "好享购", "优购", "家有购", "时尚购",
+            "聚鲨", "环球购", "央广购", "东方购", "抢购", "特卖", "电视直销",
+            "直销", "商城", "购物台", "乐拍", "咔哒购", "美嘉购", "星空购"
+    };
 
     private M3uParser() {}
 
@@ -81,6 +87,9 @@ public final class M3uParser {
         if (TIMESTAMP.matcher(name).matches()) return true;
         String hay = name + " " + tvgId;
         for (String word : BLOCK_WORDS) {
+            if (hay.contains(word)) return true;
+        }
+        for (String word : SHOPPING_WORDS) {
             if (hay.contains(word)) return true;
         }
         return false;
