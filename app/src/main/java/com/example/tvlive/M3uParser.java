@@ -26,6 +26,18 @@ public final class M3uParser {
             "聚鲨", "环球购", "央广购", "东方购", "抢购", "特卖", "电视直销",
             "直销", "商城", "购物台", "乐拍", "咔哒购", "美嘉购", "星空购"
     };
+    // 游戏直播/电竞类关键词（一律过滤）
+    private static final String[] GAME_WORDS = {
+            "游戏", "电竞", "网游", "手游", "电玩", "竞技", "虎牙", "斗鱼",
+            "主播", "LOL", "英雄联盟", "王者荣耀", "吃鸡", "DOTA", "CSGO",
+            "B站直播", "快手直播"
+    };
+    // 赛事类关键词（含这些词但不含 NBA 的过滤；NBA 频道保留）
+    private static final String[] SPORTS_WORDS = {
+            "足球", "篮球", "CBA", "排球", "网球", "羽毛球", "乒乓", "田径",
+            "赛车", "F1", "世界杯", "赛事", "体育", "奥运", "亚运", "中超",
+            "英超", "西甲", "意甲", "德甲", "欧冠"
+    };
 
     private M3uParser() {}
 
@@ -92,6 +104,16 @@ public final class M3uParser {
         for (String word : SHOPPING_WORDS) {
             if (hay.contains(word)) return true;
         }
+        // 游戏直播/电竞一律过滤
+        for (String word : GAME_WORDS) {
+            if (hay.contains(word)) return true;
+        }
+        // 赛事类：仅保留 NBA，其他赛事过滤
+        boolean isSports = false;
+        for (String word : SPORTS_WORDS) {
+            if (hay.contains(word)) { isSports = true; break; }
+        }
+        if (isSports && !hay.contains("NBA")) return true;
         return false;
     }
 }
